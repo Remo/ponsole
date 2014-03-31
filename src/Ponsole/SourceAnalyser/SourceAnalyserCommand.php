@@ -47,18 +47,30 @@ class SourceAnalyserCommand extends BaseCommand implements CommandInterface {
 
         $totalLineCount = 0;
         $totalCommentCount = 0;
-        $fileCount = 0;
+        $fileCount = iterator_count($regexIterator);
 
+        // start progress bar
+        $progress = $this->getHelperSet()->get('progress');
+        $progress->start($output, $fileCount);
+
+        // start scanning files
         foreach ($regexIterator as $fileInfo) {
+            // analyse file
             $fileName = $fileInfo[0];
 
             $codeInfo = $this->analyseFile($fileName);
 
             $totalLineCount += $codeInfo['lineCount'];
             $totalCommentCount += $codeInfo['commentLineCount'];
-            $fileCount++;
-        }
 
+            // advance the progress bar 1 unit
+            $progress->advance();
+        }
+        
+        // progress finished
+        $progress->finish();
+
+        // print result
         $output->writeln(sprintf("\n<info>We've analysed %s and found:\n"
                         . "\n"
                         . "Files: %d\n"
