@@ -1,3 +1,6 @@
 <?php
 
-return ['Ponsole\\SourceAnalyser\\SourceAnalyserCommand'];
+return [
+    'Ponsole\\SourceAnalyser\\SourceAnalyserCommand',
+    'Ponsole\\Phar\\PharCommand',
+];
