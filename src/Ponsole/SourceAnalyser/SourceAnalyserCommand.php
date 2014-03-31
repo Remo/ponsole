@@ -9,6 +9,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Ponsole\CommandInterface;
 use Ponsole\BaseCommand;
 
+/**
+ * Command to analyse source code
+ * 
+ * @author Remo Laubacher <remo.laubacher@gmail.com>
+ */
 class SourceAnalyserCommand extends BaseCommand implements CommandInterface {
 
     public function configure() {
@@ -19,6 +24,19 @@ class SourceAnalyserCommand extends BaseCommand implements CommandInterface {
         ;
     }
 
+    /**
+     * Analyses a single file specified by its name with the parameter $fileName
+     * Returns an array with two names entries:
+     * <code>
+     * array(
+     *   'lineCount' => 212,
+     *   'commentLineCount' => 56
+     * );
+     * </code>
+     * 
+     * @param string $fileName
+     * @return array
+     */
     protected function analyseFile($fileName) {
         $fileContent = file_get_contents($fileName);
         $fileLineCount = substr_count($fileContent, "\n");
@@ -66,7 +84,7 @@ class SourceAnalyserCommand extends BaseCommand implements CommandInterface {
             // advance the progress bar 1 unit
             $progress->advance();
         }
-        
+
         // progress finished
         $progress->finish();
 

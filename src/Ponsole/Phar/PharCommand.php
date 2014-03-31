@@ -9,6 +9,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Ponsole\CommandInterface;
 use Ponsole\BaseCommand;
 
+/**
+ * Phar command to create a single file PHP executable
+ * 
+ * @author Remo Laubacher <remo.laubacher@gmail.com>
+ * @package Ponsole
+ */
 class PharCommand extends BaseCommand implements CommandInterface {
 
     public function configure() {
@@ -26,7 +32,7 @@ class PharCommand extends BaseCommand implements CommandInterface {
         $name = $input->getArgument('name');
         $stub = $input->getArgument('stub');
         $webstub = $input->getArgument('webstub');
-        
+
         $phar = new \Phar($name, 0, $name);
         $phar->buildFromDirectory($dir);
         $phar->setStub($phar->createDefaultStub($stub, $webstub));
