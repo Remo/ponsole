@@ -19,6 +19,26 @@ class SourceAnalyserCommand extends BaseCommand implements CommandInterface {
         ;
     }
 
+    protected function analyseFile($fileName) {
+        $fileContent = file_get_contents($fileName);
+        $fileLineCount = substr_count($fileContent, "\n");
+        $fileCommentLineCount = 0;
+
+        foreach (token_get_all($fileContent) as $index => $token) {
+            if (is_string($token)) {
+                continue;
+            }
+
+            list ($token, $value) = $token;
+
+            if ($token == T_COMMENT || $token == T_DOC_COMMENT) {
+                $fileCommentLineCount += substr_count($value, "\n") + 1;
+            }
+        }
+
+        return ['lineCount' => $fileLineCount, 'commentLineCount' => $fileCommentLineCount];
+    }
+
     public function execute(InputInterface $input, OutputInterface $output) {
         $dir = realpath($input->getArgument('dir'));
 
@@ -28,38 +48,23 @@ class SourceAnalyserCommand extends BaseCommand implements CommandInterface {
         $totalLineCount = 0;
         $totalCommentCount = 0;
         $fileCount = 0;
-        
+
         foreach ($regexIterator as $fileInfo) {
             $fileName = $fileInfo[0];
 
-            $fileContent = file_get_contents($fileName);
-            $fileLineCount = substr_count($fileContent, "\n");
-            $fileCommentCount = 0;
+            $codeInfo = $this->analyseFile($fileName);
 
-            foreach (token_get_all($fileContent) as $index => $token) {
-                if (is_string($token)) {
-                    continue;
-                }
-
-                list ($token, $value) = $token;
-
-                if ($token == T_COMMENT || $token == T_DOC_COMMENT) {
-                    $fileCommentCount += substr_count($value, "\n") + 1;
-                }
-            }
-            
-            $totalLineCount += $fileLineCount;
-            $totalCommentCount += $fileCommentCount;
+            $totalLineCount += $codeInfo['lineCount'];
+            $totalCommentCount += $codeInfo['commentLineCount'];
             $fileCount++;
         }
 
         $output->writeln(sprintf("\n<info>We've analysed %s and found:\n"
-                . "\n"
-                . "Files: %d\n"
-                . "Lines of code: %d\n"
-                . "Lines of comments: %d\n"
-                . "</info>", 
-                $dir, $fileCount, $totalLineCount - $totalCommentCount, $totalCommentCount));
+                        . "\n"
+                        . "Files: %d\n"
+                        . "Lines of code: %d\n"
+                        . "Lines of comments: %d\n"
+                        . "</info>", $dir, $fileCount, $totalLineCount - $totalCommentCount, $totalCommentCount));
     }
 
 }
